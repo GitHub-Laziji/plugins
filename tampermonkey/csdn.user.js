@@ -80,10 +80,7 @@
     `;
     document.head.appendChild(style);
 
-    for (let n of [
-        ...document.querySelectorAll("pre[name='code']"),
-        ...document.querySelectorAll("pre[class='prettyprint']")
-    ]) {
+    for (let n of document.querySelectorAll("pre")) {
         let btn = document.createElement("button");
         btn.append("复制代码");
         btn.className = "copy-code";
