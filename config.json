@@ -8,5 +8,10 @@
         "name": "w3cschool净化",
         "desc": "去除多余信息 只保留文章",
         "path": "./tampermonkey/w3cschool.user.js"
+    },
+    {
+        "name": "知乎去登录",
+        "desc": "去除自动弹出登录",
+        "path": "./tampermonkey/zhihu.user.js"
     }
 ]
