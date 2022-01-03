@@ -44,42 +44,46 @@
         }
 
         .bar-content{
-            margin-left: 10px;
+            margin-left: 10px !important;
         }
-    
+
         *{
             user-select: auto !important;
         }
 
         .copy-code{
-            padding: 8px;
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: #409EFF;
-            color: #fff;
-            font-size: 22px;
-            font-weight: 600;
+            padding: 8px !important;
+            position: absolute !important;
+            top: 10px !important;
+            right: 10px !important;
+            background: #409EFF !important;
+            color: #fff !important;
+            font-size: 22px !important;
+            font-weight: 600 !important;
         }
 
         .msg{
-            position: fixed;
-            top: calc(50vh - 18px);
-            left: calc(50vw - 50px);
-            width: 100px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
-            font-size: 16px;
-            font-weight: 600;
-            background: #67C23A;
+            position: fixed !important;
+            top: calc(50vh - 18px) !important;
+            left: calc(50vw - 50px) !important;
+            width: 100px !important;
+            height: 36px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            color: #fff !important;
+            font-size: 16px !important;
+            font-weight: 600 !important;
+            background: #67C23A !important;
+            z-index:100 !important;
         }
     `;
     document.head.appendChild(style);
 
-    for (let n of document.querySelectorAll("pre[name='code']")) {
+    for (let n of [
+        ...document.querySelectorAll("pre[name='code']"),
+        ...document.querySelectorAll("pre[class='prettyprint']")
+    ]) {
         let btn = document.createElement("button");
         btn.append("复制代码");
         btn.className = "copy-code";
