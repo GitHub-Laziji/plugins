@@ -36,13 +36,19 @@
                 安装脚本
             </a>
         </div>
+        <div class="box">
+            <h2>更多</h2>
+            <a v-for="(item,index) of links" :key="index" :href="item" target="_blank"
+                style="margin-bottom: 8px;">{{item}}</a>
+        </div>
     </div>
     <script src="https://cdn.staticfile.org/vue/3.2.26/vue.global.js"></script>
     <script>
         Vue.createApp({
             data() {
                 return {
-                    list: []
+                    list: [],
+                    links: ["https://greasyfork.org/zh-CN/scripts"]
                 }
             },
             mounted() {
