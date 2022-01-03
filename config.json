@@ -1,10 +1,12 @@
 [
     {
-        "name": "csdn",
+        "name": "csdn净化",
+        "desc": "去除多余信息 只保留文章",
         "path": "./tampermonkey/csdn.user.js"
     },
     {
-        "name": "w3cschool",
+        "name": "w3cschool净化",
+        "desc": "去除多余信息 只保留文章",
         "path": "./tampermonkey/w3cschool.user.js"
     }
 ]

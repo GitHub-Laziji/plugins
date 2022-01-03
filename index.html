@@ -12,6 +12,7 @@
     <div id="app">
         <div v-for="(item,index) of list" :key="index" style="padding:16px;border-bottom: 1px solid #999;">
             <h2>{{item.name}}</h2>
+            <div style="margin-bottom: 16px;">{{item.desc}}</div>
             <a :href="item.path"
                 style="transition: box-shadow .2s;display: inline-block;background-color: #409EFF;padding: 0.5em 1em;color: #fff;text-decoration: none;">
                 安装脚本
