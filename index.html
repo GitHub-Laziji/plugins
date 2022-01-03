@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plugins</title>
+</head>
+
+<body>
+    <div id="app">
+        <div v-for="(item,index) of list" :key="index" style="padding:16px;border-bottom: 1px solid #999;">
+            <h2>{{item.name}}</h2>
+            <a :href="item.path">安装脚本</a>
+        </div>
+    </div>
+    <script src="https://cdn.staticfile.org/vue/3.2.26/vue.global.js"></script>
+    <script>
+        Vue.createApp({
+            data() {
+                return {
+                    list: []
+                }
+            },
+            mounted() {
+                fetch("./config.json").then(resp => resp.json()).then(data => {
+                    this.list = data;
+                });
+            }
+        }).mount('#app')
+    </script>
+</body>
+
+</html>
