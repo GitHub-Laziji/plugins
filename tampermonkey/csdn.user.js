@@ -9,7 +9,7 @@
 // ==/UserScript==
 
 let style = document.createElement("style");
-    style.innerHTML=`
+style.innerHTML = `
         #csdn-toolbar,
         #rightAside,
         #recommendAdBox,
@@ -37,5 +37,5 @@ let style = document.createElement("style");
         *{
             user-select: auto !important;
         }
-    `;
-    document.head.appendChild(style);
+`;
+document.head.appendChild(style);

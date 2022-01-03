@@ -2,5 +2,9 @@
     {
         "name": "csdn",
         "path": "./tampermonkey/csdn.user.js"
+    },
+    {
+        "name": "w3cschool",
+        "path": "./tampermonkey/w3cschool.user.js"
     }
 ]

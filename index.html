@@ -12,7 +12,10 @@
     <div id="app">
         <div v-for="(item,index) of list" :key="index" style="padding:16px;border-bottom: 1px solid #999;">
             <h2>{{item.name}}</h2>
-            <a :href="item.path">安装脚本</a>
+            <a :href="item.path"
+                style="transition: box-shadow .2s;display: inline-block;background-color: #409EFF;padding: 0.5em 1em;color: #fff;text-decoration: none;">
+                安装脚本
+            </a>
         </div>
     </div>
     <script src="https://cdn.staticfile.org/vue/3.2.26/vue.global.js"></script>
