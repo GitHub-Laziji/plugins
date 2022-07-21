@@ -13,5 +13,10 @@
         "name": "知乎去登录",
         "desc": "去除自动弹出登录",
         "path": "./tampermonkey/zhihu.user.js"
+    },
+    {
+        "name": "behance下载图片",
+        "desc": "behance下载图片",
+        "path": "./tampermonkey/behance-download-image.user.js"
     }
 ]
