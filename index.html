@@ -7,18 +7,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Plugins</title>
     <style>
-        #app {
+        .title {
+            width: 100%;
             display: flex;
-            flex-wrap: wrap;
+            justify-content: center;
+            font-size: 36px;
+            font-weight: 600;
+            height: 62px;
+            align-items: center;
+            color: #fff;
+            background: #24292f;
         }
 
-        .btn {
-            transition: box-shadow .2s;
-            display: inline-block;
-            padding: 0.5em 1em;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 4px;
+        .main {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 16px;
         }
 
         .box {
@@ -35,30 +39,41 @@
             margin-bottom: 16px;
             box-shadow: 0 2px 4px rgb(0 0 0 / 12%), 0 0 6px rgb(0 0 0 / 4%);
         }
+
+        .btn {
+            transition: box-shadow .2s;
+            display: inline-block;
+            padding: 0.5em 1em;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+        }
     </style>
 </head>
 
-<body>
+<body style="margin: 0">
     <div id="app">
-        <div style="width:100%;display:flex;justify-content: center;font-size: 40px;font-weight: 600;">
+        <div class="title">
             辣子鸡的插件仓库
         </div>
-        <div class="box">
-            <h1>Tampermonkey</h1>
-            <a href="https://www.tampermonkey.net/" target="_blank" class="btn"
-                style="background-color: #67C23A;">安装插件</a>
-        </div>
-        <div v-for="(item,index) of list" :key="index" class="box">
-            <h1>{{item.name}}</h1>
-            <div style="margin-bottom: 16px;">{{item.desc}}</div>
-            <a :href="item.path" target="_blank" class="btn" style="background-color: #409EFF;">
-                安装脚本
-            </a>
-        </div>
-        <div class="box">
-            <h1>更多脚本</h1>
-            <a v-for="(item,index) of links" :key="index" :href="item" target="_blank"
-                style="margin-bottom: 8px;">{{item}}</a>
+        <div class="main">
+            <div class="box">
+                <h1>Tampermonkey</h1>
+                <a href="https://www.tampermonkey.net/" target="_blank" class="btn"
+                    style="background-color: #67C23A;">安装插件</a>
+            </div>
+            <div v-for="(item,index) of list" :key="index" class="box">
+                <h1>{{item.name}}</h1>
+                <div style="margin-bottom: 16px;">{{item.desc}}</div>
+                <a :href="item.path" target="_blank" class="btn" style="background-color: #409EFF;">
+                    安装脚本
+                </a>
+            </div>
+            <div class="box">
+                <h1>更多脚本</h1>
+                <a v-for="(item,index) of links" :key="index" :href="item" target="_blank"
+                    style="margin-bottom: 8px;">{{item}}</a>
+            </div>
         </div>
     </div>
     <script src="https://cdn.staticfile.org/vue/3.2.26/vue.global.js"></script>
