@@ -1,6 +1,6 @@
 [
     {
-        "name": "csdn净化",
+        "name": "CSDN净化",
         "desc": "去除多余信息 只保留文章",
         "path": "./tampermonkey/csdn.user.js"
     },
@@ -15,8 +15,8 @@
         "path": "./tampermonkey/zhihu.user.js"
     },
     {
-        "name": "behance下载图片",
-        "desc": "behance下载图片",
+        "name": "Behance下载图片",
+        "desc": "不登录下载图片",
         "path": "./tampermonkey/behance-download-image.user.js"
     }
 ]
