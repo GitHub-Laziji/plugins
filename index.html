@@ -40,6 +40,11 @@
             box-shadow: 0 2px 4px rgb(0 0 0 / 12%), 0 0 6px rgb(0 0 0 / 4%);
         }
 
+        .sub-title{
+            font-size: 20px;
+            font-weight: 600;
+        }
+
         .btn {
             transition: box-shadow .2s;
             display: inline-block;
@@ -58,19 +63,19 @@
         </div>
         <div class="main">
             <div class="box">
-                <h1>Tampermonkey</h1>
+                <div class="sub-title">Tampermonkey</div>
                 <a href="https://www.tampermonkey.net/" target="_blank" class="btn"
                     style="background-color: #67C23A;">安装插件</a>
             </div>
             <div v-for="(item,index) of list" :key="index" class="box">
-                <h1>{{item.name}}</h1>
+                <div class="sub-title">{{item.name}}</div>
                 <div style="margin-bottom: 16px;">{{item.desc}}</div>
                 <a :href="item.path" target="_blank" class="btn" style="background-color: #409EFF;">
                     安装脚本
                 </a>
             </div>
             <div class="box">
-                <h1>更多脚本</h1>
+                <div class="sub-title">更多脚本</div>
                 <a v-for="(item,index) of links" :key="index" :href="item" target="_blank"
                     style="margin-bottom: 8px;">{{item}}</a>
             </div>
