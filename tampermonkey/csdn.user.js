@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         csdn净化
-// @namespace    http://tampermonkey.net/
+// @namespace    laziji
 // @version      0.1
-// @description  try to take over the world!
-// @author       You
+// @description  csdn净化
+// @author       laziji
 // @match        *://*.csdn.net/*
 // @grant        none
 // ==/UserScript==

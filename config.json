@@ -10,11 +10,6 @@
         "path": "https://github.com/GitHub-Laziji/plugins/raw/main/tampermonkey/w3cschool.user.js"
     },
     {
-        "name": "知乎去登录",
-        "desc": "去除自动弹出登录",
-        "path": "https://github.com/GitHub-Laziji/plugins/raw/main/tampermonkey/zhihu.user.js"
-    },
-    {
         "name": "Behance下载图片",
         "desc": "不登录下载图片",
         "path": "https://github.com/GitHub-Laziji/plugins/raw/main/tampermonkey/behance-download-image.user.js"

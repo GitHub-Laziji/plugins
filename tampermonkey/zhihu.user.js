@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         知乎去登陆
-// @namespace    http://tampermonkey.net/
+// @namespace    laziji
 // @version      0.1
-// @description  try to take over the world!
-// @author       You
+// @description  知乎去登陆
+// @author       laziji
 // @match        *://*.zhihu.com/*
 // @grant        none
 // ==/UserScript==

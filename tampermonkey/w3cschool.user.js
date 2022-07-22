@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name         w3cschool净化
-// @namespace    http://tampermonkey.net/
+// @namespace    laziji
 // @version      0.1
-// @description  try to take over the world!
-// @author       You
+// @description  w3cschool净化
+// @author       laziji
 // @match        *://www.w3cschool.cn/*
 // @grant        none
 // ==/UserScript==
