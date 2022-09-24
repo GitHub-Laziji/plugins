@@ -13,5 +13,10 @@
         "name": "Behance下载图片",
         "desc": "不登录下载图片",
         "path": "https://github.com/GitHub-Laziji/plugins/raw/main/tampermonkey/behance-download-image.user.js"
+    },
+    {
+        "name": "HTML To Figma",
+        "desc": "HTML转Figma",
+        "path": "https://github.com/GitHub-Laziji/plugins/raw/main/tampermonkey/html-to-figma.user.js"
     }
 ]
