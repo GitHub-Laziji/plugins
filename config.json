@@ -18,5 +18,10 @@
         "name": "HTML To Figma",
         "desc": "HTML转Figma",
         "path": "https://github.com/GitHub-Laziji/plugins/raw/main/tampermonkey/html-to-figma.user.js"
+    },
+    {
+        "name": "ChatGPT",
+        "desc": "ChatGPT",
+        "path": "https://github.com/GitHub-Laziji/plugins/raw/main/tampermonkey/chat-gpt.user.js"
     }
 ]
