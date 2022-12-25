@@ -10,7 +10,7 @@
 
 (function () {
     document.querySelector("#ai-btn").onclick = function () {
-        aiClick();
         localStorage.setItem("click-second4", "0");
+        aiClick();
     };
 })();
