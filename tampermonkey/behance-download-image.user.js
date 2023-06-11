@@ -5,7 +5,6 @@
 // @description  behance下载图片
 // @author       laziji
 // @match        https://www.behance.net/*
-// @icon         https://www.google.com/s2/favicons?sz=64&domain=behance.net
 // @grant        none
 // ==/UserScript==
 
