@@ -23,5 +23,10 @@
         "name": "ChatGPT",
         "desc": "ChatGPT",
         "path": "https://github.com/GitHub-Laziji/plugins/raw/main/tampermonkey/chat-gpt.user.js"
+    },
+    {
+        "name": "ChatGPT AccessToken复制",
+        "desc": "AccessToken复制",
+        "path": "https://github.com/GitHub-Laziji/plugins/raw/main/tampermonkey/chat-gpt-token-copy.user.js"
     }
 ]
