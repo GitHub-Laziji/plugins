@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         ChatGPT AccessToken复制
+// @name         ChatGPT复制Token
 // @namespace    laziji
 // @version      0.1
-// @description  ChatGPT AccessToken复制
+// @description  ChatGPT复制Token
 // @author       laziji
 // @match        https://chat.openai.com/api/auth/session
 // @grant        none
