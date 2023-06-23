@@ -1,8 +1,8 @@
 // ==UserScript==
-// @name         Translator
+// @name         网页翻译
 // @namespace    laziji
 // @version      0.1
-// @description  Translator
+// @description  网页翻译
 // @author       laziji
 // @include      *://*/*
 // @grant        GM_xmlhttpRequest
