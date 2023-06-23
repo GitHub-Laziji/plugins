@@ -8,6 +8,8 @@
 // @grant        GM_xmlhttpRequest
 // @grant        GM_setValue
 // @grant        GM_getValue
+// @grant        GM_registerMenuCommand
+// @grant        GM_unregisterMenuCommand
 // ==/UserScript==
 
 (function () {
@@ -30,8 +32,7 @@
                         resolve(auth);
                     },
                     onerror: (e) => {
-                        console.log("BingTranslator.getAuth() error", e);
-                        reject();
+                        reject(e);
                     }
                 });
             });
@@ -60,14 +61,13 @@
                                 anonymous: true,
                                 nocache: true,
                                 onload: (e) => {
-                                    let transText = eval(e.responseText)[0].translations[0].text;
+                                    let transText = JSON.parse(e.responseText)[0].translations[0].text;
                                     let transArr = transText.split("🍕");
                                     tempTexts.forEach((v, i) => result[v] = transArr[i]);
                                     resolve(result);
                                 },
                                 onerror: (e) => {
-                                    console.log("BingTranslator.translation() error", e);
-                                    reject();
+                                    reject(e);
                                 }
                             });
                         });
@@ -78,11 +78,26 @@
         }
     }
 
+    class TextTranslator {
+        getName() {
+            return "Test";
+        }
+        getAuth() {
+            return Promise.resolve({})
+        }
+        translation(auth, texts) {
+            let map = {};
+            texts.forEach(t => { map[t] = t + "test" });
+            return Promise.resolve(map)
+        }
+    }
 
 
 
 
-    const TRANSLATOR_CLASSES = [BingTranslator];
+
+
+    const TRANSLATOR_CLASSES = [BingTranslator, TextTranslator];
     const TRANSLATOR_INSTANCE_MAPPING = {};
     TRANSLATOR_CLASSES.forEach(translatorClass => {
         let ins = new translatorClass();
@@ -108,6 +123,9 @@
     }
 
     const getSelectedNodes = function () {
+        if (window.getSelection().rangeCount == 0) {
+            return [];
+        }
         let range = window.getSelection().getRangeAt(0);
         let selected = range.commonAncestorContainer;
         let childNodes = [];
@@ -133,53 +151,48 @@
         return childNodes;
     }
 
-    let promise = new Promise((resolve, reject) => {
-        let auth = auths[instance.getName()];
-        if (auth && new Date().getTime() - auth.time < auth.timeout * 0.8) {
-            resolve(auth);
-            console.log(auth)
-            return;
-        }
-        instance.getAuth().then(auth => {
-            auth.time = new Date().getTime();
-            auths[instance.getName()] = auth;
-            GM_setValue("AUTHS", JSON.stringify(auths));
-            console.log(auths);
-            resolve(auth);
-        }).catch(reject);
-    });
+    const getAuthPromise = () => {
+        return new Promise((resolve, reject) => {
+            let auth = auths[instance.getName()];
+            if (auth && (!auth.timeout || new Date().getTime() - auth.time < auth.timeout * 0.8)) {
+                resolve(auth);
+                return;
+            }
+            instance.getAuth().then(auth => {
+                auth.time = new Date().getTime();
+                auths[instance.getName()] = auth;
+                GM_setValue("AUTHS", JSON.stringify(auths));
+                resolve(auth);
+            }).catch(reject);
+        });
+    }
+
+    let promise = getAuthPromise();
 
     document.addEventListener('keydown', (e) => {
         if (e.ctrlKey && e.code === "KeyQ") {
             let textMap = {};
             let texts = [];
-            console.log(getSelectedNodes())
             getSelectedNodes().forEach(t => {
-                console.log(t)
                 if (!/[a-zA-Z]{2,}/.test(t.textContent.trim())) {
                     return;
                 }
-                console.log(1, t.TRANSLATION_STATUS, !t.TRANSLATION_STATUS && t.TRANSLATION_STATUS != "INIT")
                 if (t.TRANSLATION_STATUS && t.TRANSLATION_STATUS != "INIT") {
                     return;
                 }
-                console.log(2)
                 if (t.TRANSLATION_TEXT) {
                     t.TRANSLATION_STATUS = "TRANSLATED";
                     t.textContent = t.TRANSLATION_TEXT;
                     return;
                 }
-                console.log(3)
                 t.TRANSLATION_STATUS = "TRANSLATING";
                 if (!textMap[t.textContent]) {
                     textMap[t.textContent] = [];
                     texts.push(t.textContent);
                 }
-                console.log(4)
                 textMap[t.textContent].push(t);
                 return;
             });
-            console.log(texts)
             if (!texts.length) {
                 return;
             }
@@ -218,4 +231,24 @@
             });
         }
     });
+
+    let menuKeys = [];
+    const initMenu = () => {
+        menuKeys.forEach(key => [
+            GM_unregisterMenuCommand(key)
+        ])
+        menuKeys = [];
+        for (let name in TRANSLATOR_INSTANCE_MAPPING) {
+            menuKeys.push(GM_registerMenuCommand(`${name} ${instance.getName() == name ? "✔" : ""}`, () => {
+                if (instance.getName() == name) {
+                    return;
+                }
+                GM_setValue("ACTIVE_INSTANCE_NAME", name);
+                instance = TRANSLATOR_INSTANCE_MAPPING[name];
+                promise = getAuthPromise();
+                initMenu();
+            }));
+        }
+    }
+    initMenu();
 })();
