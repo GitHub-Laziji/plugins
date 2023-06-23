@@ -11,6 +11,33 @@
 // ==/UserScript==
 
 (function () {
+
+    const getSelectedNodes = function () {
+        let range = window.getSelection().getRangeAt(0);
+        let selected = range.commonAncestorContainer;
+        let childNodes = [];
+        if (selected instanceof Text) {
+            childNodes.push(selected);
+        } else {
+            selected.querySelectorAll("*").forEach(e => {
+                e.childNodes.forEach(t => {
+                    if (!(t instanceof Text)) {
+                        return;
+                    }
+                    if (!range.intersectsNode(t)) {
+                        return;
+                    }
+                    let textContent = t.textContent.trim();
+                    if (!textContent) {
+                        return;
+                    }
+                    childNodes.push(t);
+                });
+            });
+        }
+        return childNodes;
+    }
+
     let p = new Promise((r, j) => {
         let authStr = GM_getValue("auth");
         if (authStr) {
@@ -35,50 +62,34 @@
         });
     });
 
-
     document.addEventListener('keydown', (e) => {
         if (e.ctrlKey && e.code === "KeyQ") {
-            let range = window.getSelection().getRangeAt(0);
-            let selected = range.commonAncestorContainer;
-            console.log(selected)
-            let childNodes = [];
-            if (selected instanceof Text) {
-                if (!selected.TRANSLATION_STATUS || selected.TRANSLATION_STATUS == "INIT") {
-                    selected.TRANSLATION_STATUS = "TRANSLATING";
-                    childNodes.push(selected);
-                }
-            } else {
-                selected.querySelectorAll("p,li,a,h1,h2,h3,h4,span,div").forEach(e => {
-                    e.childNodes.forEach(t => {
-                        if (!range.intersectsNode(t)) {
-                            return;
-                        }
-                        if (t.textContent.trim().length < 3 || /^\s+$/.test(t.textContent.trim())) {
-                            return;
-                        }
-                        if (!t.TRANSLATION_STATUS || t.TRANSLATION_STATUS == "INIT") {
-                            t.TRANSLATION_STATUS = "TRANSLATING";
-                            if (!(t instanceof Text)) {
-                                return;
-                            }
-                            childNodes.push(t);
-                        }
-                    });
-                });
-            }
-            if (!childNodes.length) {
-                return;
-            }
-            console.log(childNodes)
             let textMap = {};
             let textArr = [];
-            childNodes.forEach(t => {
+            getSelectedNodes().forEach(t => {
+                if (!/[a-zA-Z]{2,}/.test(t.textContent.trim())) {
+                    return;
+                }
+                if (t.TRANSLATION_STATUS == "TRANSLATING" || t.TRANSLATION_STATUS == "TRANSLATED") {
+                    return;
+                }
+                if (t.TRANSLATION_TEXT) {
+                    t.TRANSLATION_STATUS = "TRANSLATED";
+                    t.textContent = t.TRANSLATION_TEXT;
+                    return;
+                }
+                t.TRANSLATION_STATUS = "TRANSLATING";
                 if (!textMap[t.textContent]) {
                     textMap[t.textContent] = [];
                     textArr.push(t.textContent);
                 }
                 textMap[t.textContent].push(t);
+                return;
             });
+            console.log(textArr)
+            if (!textArr.length) {
+                return;
+            }
             let subTextLen = 0;
             let subTextArr = [];
             for (let i = 0; i < textArr.length; i++) {
@@ -86,7 +97,6 @@
                 subTextLen += textArr[i].length;
                 if (i == textArr.length - 1 || subTextLen + textArr[i + 1].length > 4000) {
                     let tempArr = subTextArr;
-                    console.log(tempArr)
                     subTextArr = [];
                     subTextLen = 0;
                     p = p.then((auth) => {
@@ -101,14 +111,16 @@
                                 anonymous: true,
                                 nocache: true,
                                 onload: (e) => {
-                                    console.log(e)
                                     let transText = eval(e.responseText)[0].translations[0].text;
-                                    console.log(transText)
-                                    transText.split("🍕").forEach((v, i) => {
-                                        textMap[tempArr[i]].forEach(o => {
-                                            o.TRANSLATION_STATUS = "TRANSLATED";
-                                            o.ORIGIN_TEXT = o.textContent;
-                                            o.textContent = v;
+                                    let transArr = transText.split("🍕");
+                                    transArr.forEach((v, i) => {
+                                        textMap[tempArr[i]].forEach(t => {
+                                            t.TRANSLATION_TEXT = v;
+                                            if (t.TRANSLATION_STATUS == "TRANSLATING") {
+                                                t.ORIGIN_TEXT = t.textContent;
+                                                t.TRANSLATION_STATUS = "TRANSLATED";
+                                                t.textContent = v;
+                                            }
                                         });
                                     });
                                     r(auth);
@@ -123,23 +135,17 @@
 
     document.addEventListener('keydown', (e) => {
         if (e.ctrlKey && e.code === "KeyW") {
-            let selected = window.getSelection().getRangeAt(0).commonAncestorContainer;
-            let childNodes = [];
-            if (selected instanceof Text) {
-                if (selected.TRANSLATION_STATUS == "TRANSLATED") {
-                    selected.TRANSLATION_STATUS = "INIT";
-                    selected.textContent = selected.ORIGIN_TEXT;
+            getSelectedNodes().forEach(t => {
+                if (t.TRANSLATION_STATUS == "TRANSLATING") {
+                    t.TRANSLATION_STATUS = "DISCONTINUED";
+                    return;
                 }
-            } else {
-                selected.querySelectorAll("p,li,a,h1,h2,h3,h4,span,div").forEach(e => {
-                    e.childNodes.forEach(t => {
-                        if (t.TRANSLATION_STATUS == "TRANSLATED") {
-                            t.TRANSLATION_STATUS = "INIT";
-                            t.textContent = t.ORIGIN_TEXT;
-                        }
-                    });
-                });
-            }
+                if (t.TRANSLATION_STATUS == "TRANSLATED") {
+                    t.TRANSLATION_STATUS = "INIT";
+                    t.textContent = t.ORIGIN_TEXT;
+                    return;
+                }
+            });
         }
     });
 })();
