@@ -80,7 +80,7 @@
 
 
 
-    
+
 
     const TRANSLATOR_CLASSES = [BingTranslator];
     const TRANSLATOR_INSTANCE_MAPPING = {};
@@ -140,13 +140,13 @@
             console.log(auth)
             return;
         }
-        return instance.getAuth().then(auth => {
+        instance.getAuth().then(auth => {
             auth.time = new Date().getTime();
             auths[instance.getName()] = auth;
             GM_setValue("AUTHS", JSON.stringify(auths));
-            console.log(auths)
-            return auth;
-        });
+            console.log(auths);
+            resolve(auth);
+        }).catch(reject);
     });
 
     document.addEventListener('keydown', (e) => {
