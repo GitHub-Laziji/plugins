@@ -15,11 +15,11 @@
 (function () {
 
     class BingTranslator {
+        static getCode() {
+            return "BING";
+        }
         static getName() {
             return "Bing";
-        }
-        static getDesc() {
-            return "Bing(推荐)";
         }
         static getAuth() {
             return new Promise((resolve, reject) => {
@@ -63,11 +63,12 @@
                                 },
                                 anonymous: true,
                                 nocache: true,
-                                onload: (e) => {
+                                onload: (resp) => {
                                     let transText;
                                     try {
-                                        transText = JSON.parse(e.responseText)[0].translations[0].text;
+                                        transText = JSON.parse(resp.responseText)[0].translations[0].text;
                                     } catch (e) {
+                                        console.log(e,resp)
                                         reject(e);
                                         return;
                                     }
@@ -76,6 +77,7 @@
                                     resolve(result);
                                 },
                                 onerror: (e) => {
+                                    console.log(e)
                                     reject(e);
                                 }
                             });
@@ -88,10 +90,10 @@
     }
 
     class DeepLTranslator {
-        static getName() {
+        static getCode() {
             return "DeepL";
         }
-        static getDesc() {
+        static getName() {
             return "DeepL";
         }
         static getAuth() {
@@ -149,7 +151,6 @@
                                 anonymous: true,
                                 nocache: true,
                                 onload: (e) => {
-                                    console.log(e, e.responseText)
                                     let transText;
                                     try {
                                         let beams = JSON.parse(e.responseText).result.translations[0].beams;
@@ -197,7 +198,7 @@
     const TRANSLATORS = [BingTranslator];
     const TRANSLATOR_MAPPING = {};
     TRANSLATORS.forEach(translator => {
-        TRANSLATOR_MAPPING[translator.getName()] = translator;
+        TRANSLATOR_MAPPING[translator.getCode()] = translator;
     });
 
     let instance;
@@ -205,7 +206,7 @@
         instance = TRANSLATOR_MAPPING[GM_getValue("ACTIVE_INSTANCE_NAME")];
     } else {
         instance = TRANSLATORS[0];
-        GM_setValue("ACTIVE_INSTANCE_NAME", instance.getName());
+        GM_setValue("ACTIVE_INSTANCE_NAME", instance.getCode());
     }
 
     let auths;
@@ -247,14 +248,14 @@
 
     const getAuthPromise = () => {
         return new Promise((resolve, reject) => {
-            let auth = auths[instance.getName()];
+            let auth = auths[instance.getCode()];
             if (auth && (!auth.timeout || new Date().getTime() - auth.time < auth.timeout * 0.8)) {
                 resolve(auth);
                 return;
             }
             instance.getAuth().then(auth => {
                 auth.time = new Date().getTime();
-                auths[instance.getName()] = auth;
+                auths[instance.getCode()] = auth;
                 GM_setValue("AUTHS", JSON.stringify(auths));
                 resolve(auth);
             }).catch(reject);
@@ -318,6 +319,7 @@
                             }
                         });
                     }
+                    return auth;
                 });
             });
         }
@@ -341,11 +343,11 @@
         ])
         menuKeys = [];
         for (let translator of TRANSLATORS) {
-            menuKeys.push(GM_registerMenuCommand(`${translator.getDesc()} ${instance == translator ? "✔" : ""}`, () => {
+            menuKeys.push(GM_registerMenuCommand(`${translator.getName()} ${instance == translator ? "✔" : ""}`, () => {
                 if (instance == translator) {
                     return;
                 }
-                GM_setValue("ACTIVE_INSTANCE_NAME", translator.getName());
+                GM_setValue("ACTIVE_INSTANCE_NAME", translator.getCode());
                 instance = translator;
                 promise = getAuthPromise();
                 initMenu();
