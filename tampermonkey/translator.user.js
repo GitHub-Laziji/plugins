@@ -15,10 +15,10 @@
 (function () {
 
     class BingTranslator {
-        getName() {
+        static getName() {
             return "Bing";
         }
-        getAuth() {
+        static getAuth() {
             return new Promise((resolve, reject) => {
                 GM_xmlhttpRequest({
                     method: "GET",
@@ -37,7 +37,7 @@
                 });
             });
         }
-        translation(auth, texts) {
+        static translation(auth, texts) {
             let { key, token } = auth;
             let promise = Promise.resolve({});
             let subTextLen = 0;
@@ -66,6 +66,7 @@
                                         transText = JSON.parse(e.responseText)[0].translations[0].text;
                                     } catch (e) {
                                         reject(e);
+                                        return;
                                     }
                                     let transArr = transText.split("🍕");
                                     tempTexts.forEach((v, i) => result[v] = transArr[i]);
@@ -84,16 +85,101 @@
     }
 
     class DeepLTranslator {
-        getName() {
+        static getName() {
             return "DeepL";
         }
-        getAuth() {
+        static getAuth() {
             return Promise.resolve({})
         }
-        translation(auth, texts) {
-            let map = {};
-            texts.forEach(t => { map[t] = t + "test" });
-            return Promise.resolve(map)
+        static translation(auth, texts) {
+            let promise = Promise.resolve({});
+            let subTextLen = 0;
+            let subTexts = [];
+            for (let i = 0; i < texts.length; i++) {
+                subTexts.push(texts[i]);
+                subTextLen += texts[i].length;
+                if (i == texts.length - 1 || subTextLen + texts[i + 1].length > 4000) {
+                    let tempTexts = subTexts;
+                    subTexts = [];
+                    subTextLen = 0;
+                    promise = promise.then((result) => {
+                        return new Promise((resolve, reject) => {
+                            GM_xmlhttpRequest({
+                                method: "POST",
+                                url: "https://www2.deepl.com/jsonrpc?method=LMT_handle_jobs",
+                                data: JSON.stringify({
+                                    "jsonrpc": "2.0",
+                                    "method": "LMT_handle_jobs",
+                                    "params": {
+                                        "jobs": [
+                                            {
+                                                "kind": "default",
+                                                "sentences": [
+                                                    {
+                                                        "text": tempTexts.join("🍕"),
+                                                        "id": 0,
+                                                        "prefix": ""
+                                                    }
+                                                ],
+                                                "preferred_num_beams": 3,
+                                                "quality": "fast"
+                                            }
+                                        ],
+                                        "lang": {
+                                            "source_lang_user_selected": "auto",
+                                            "target_lang": "ZH"
+                                        },
+                                        "priority": -1,
+                                        "commonJobParams": {
+                                            "mode": "translate",
+                                            "browserType": 1
+                                        },
+                                        "timestamp": new Date().getTime()
+                                    }
+                                }),
+                                headers: {
+                                    "content-type": "application/json"
+                                },
+                                anonymous: true,
+                                nocache: true,
+                                onload: (e) => {
+                                    console.log(e, e.responseText)
+                                    let transText;
+                                    try {
+                                        let beams = JSON.parse(e.responseText).result.translations[0].beams;
+                                        let minEnCount = null;
+                                        let maxStrLen = null;
+                                        beams.forEach(b => {
+                                            let enCount = 0;
+                                            for (let ch of b.sentences[0].text) {
+                                                if (ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z') {
+                                                    enCount++;
+                                                }
+
+                                            }
+                                            if (minEnCount == null || enCount < minEnCount || enCount == minEnCount && b.sentences[0].text.length > maxStrLen) {
+                                                transText = b.sentences[0].text;
+                                                minEnCount = enCount;
+                                                maxStrLen = b.sentences[0].text.length;
+                                            }
+                                        })
+                                    } catch (e) {
+                                        reject(e);
+                                        return;
+                                    }
+                                    let transArr = transText.split("🍕");
+                                    tempTexts.forEach((v, i) => result[v] = transArr[i]);
+                                    resolve(result);
+                                },
+                                onerror: (e) => {
+                                    reject(e);
+                                }
+                            });
+                        });
+                    });
+                }
+            }
+            return promise;
         }
     }
 
@@ -102,21 +188,18 @@
 
 
 
-    const TRANSLATOR_CLASSES = [BingTranslator, DeepLTranslator];
-    const TRANSLATOR_INSTANCE_MAPPING = {};
-    TRANSLATOR_CLASSES.forEach(translatorClass => {
-        let ins = new translatorClass();
-        TRANSLATOR_INSTANCE_MAPPING[ins.getName()] = ins;
+    const TRANSLATORS = [BingTranslator, DeepLTranslator];
+    const TRANSLATOR_MAPPING = {};
+    TRANSLATORS.forEach(translator => {
+        TRANSLATOR_MAPPING[translator.getName()] = translator;
     });
 
     let instance;
-    if (GM_getValue("ACTIVE_INSTANCE_NAME")) {
-        instance = TRANSLATOR_INSTANCE_MAPPING[GM_getValue("ACTIVE_INSTANCE_NAME")];
+    if (GM_getValue("ACTIVE_INSTANCE_NAME") && TRANSLATOR_MAPPING[GM_getValue("ACTIVE_INSTANCE_NAME")]) {
+        instance = TRANSLATOR_MAPPING[GM_getValue("ACTIVE_INSTANCE_NAME")];
     } else {
-        for (let name in TRANSLATOR_INSTANCE_MAPPING) {
-            instance = TRANSLATOR_INSTANCE_MAPPING[name];
-            GM_setValue("ACTIVE_INSTANCE_NAME", name);
-        }
+        instance = TRANSLATORS[0];
+        GM_setValue("ACTIVE_INSTANCE_NAME", instance.getName());
     }
 
     let auths;
@@ -251,13 +334,13 @@
             GM_unregisterMenuCommand(key)
         ])
         menuKeys = [];
-        for (let name in TRANSLATOR_INSTANCE_MAPPING) {
-            menuKeys.push(GM_registerMenuCommand(`${name} ${instance.getName() == name ? "✔" : ""}`, () => {
-                if (instance.getName() == name) {
+        for (let translator of TRANSLATORS) {
+            menuKeys.push(GM_registerMenuCommand(`${translator.getName()} ${instance == translator ? "✔" : ""}`, () => {
+                if (instance == translator) {
                     return;
                 }
-                GM_setValue("ACTIVE_INSTANCE_NAME", name);
-                instance = TRANSLATOR_INSTANCE_MAPPING[name];
+                GM_setValue("ACTIVE_INSTANCE_NAME", translator.getName());
+                instance = translator;
                 promise = getAuthPromise();
                 initMenu();
             }));
