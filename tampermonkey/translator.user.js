@@ -18,6 +18,9 @@
         static getName() {
             return "Bing";
         }
+        static getDesc() {
+            return "Bing(推荐)";
+        }
         static getAuth() {
             return new Promise((resolve, reject) => {
                 GM_xmlhttpRequest({
@@ -86,6 +89,9 @@
 
     class DeepLTranslator {
         static getName() {
+            return "DeepL";
+        }
+        static getDesc() {
             return "DeepL";
         }
         static getAuth() {
@@ -188,7 +194,7 @@
 
 
 
-    const TRANSLATORS = [BingTranslator, DeepLTranslator];
+    const TRANSLATORS = [BingTranslator];
     const TRANSLATOR_MAPPING = {};
     TRANSLATORS.forEach(translator => {
         TRANSLATOR_MAPPING[translator.getName()] = translator;
@@ -335,7 +341,7 @@
         ])
         menuKeys = [];
         for (let translator of TRANSLATORS) {
-            menuKeys.push(GM_registerMenuCommand(`${translator.getName()} ${instance == translator ? "✔" : ""}`, () => {
+            menuKeys.push(GM_registerMenuCommand(`${translator.getDesc()} ${instance == translator ? "✔" : ""}`, () => {
                 if (instance == translator) {
                     return;
                 }
