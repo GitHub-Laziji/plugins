@@ -61,7 +61,12 @@
                                 anonymous: true,
                                 nocache: true,
                                 onload: (e) => {
-                                    let transText = JSON.parse(e.responseText)[0].translations[0].text;
+                                    let transText;
+                                    try {
+                                        transText = JSON.parse(e.responseText)[0].translations[0].text;
+                                    } catch (e) {
+                                        reject(e);
+                                    }
                                     let transArr = transText.split("🍕");
                                     tempTexts.forEach((v, i) => result[v] = transArr[i]);
                                     resolve(result);
@@ -78,9 +83,9 @@
         }
     }
 
-    class TextTranslator {
+    class DeepLTranslator {
         getName() {
-            return "Test";
+            return "DeepL";
         }
         getAuth() {
             return Promise.resolve({})
@@ -97,7 +102,7 @@
 
 
 
-    const TRANSLATOR_CLASSES = [BingTranslator, TextTranslator];
+    const TRANSLATOR_CLASSES = [BingTranslator, DeepLTranslator];
     const TRANSLATOR_INSTANCE_MAPPING = {};
     TRANSLATOR_CLASSES.forEach(translatorClass => {
         let ins = new translatorClass();
@@ -198,7 +203,7 @@
             }
             promise = promise.then(auth => {
                 return instance.translation(auth, texts).then(result => {
-                    for (let text in result) {
+                    for (let text in textMap) {
                         let v = result[text];
                         textMap[text].forEach(t => {
                             if (v) {
@@ -216,6 +221,14 @@
                         })
                     }
                     return auth;
+                }).catch(_ => {
+                    for (let text in textMap) {
+                        textMap[text].forEach(t => {
+                            if (t.TRANSLATION_STATUS == "TRANSLATING") {
+                                t.TRANSLATION_STATUS = "INIT";
+                            }
+                        });
+                    }
                 });
             });
         }
