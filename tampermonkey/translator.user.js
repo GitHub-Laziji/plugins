@@ -25,13 +25,32 @@
             return new Promise((resolve, reject) => {
                 GM_xmlhttpRequest({
                     method: "GET",
-                    url: "https://cn.bing.com/translator",
+                    url: "https://www.bing.com/translator",
                     anonymous: true,
                     nocache: true,
                     onload: (e) => {
                         let html = e.responseText;
                         let data = html.match(/params_AbusePreventionHelper\s*=\s*\[\s*(\d+)\s*,\s*"([^"]+)"\s*,\s*(\d+)\s*]/);
-                        let auth = { key: Number(data[1]), token: data[2], timeout: Number(data[3]) };
+                        let auth = {
+                            key: Number(data[1]),
+                            token: data[2],
+                            timeout: 0,
+                            region: e.finalUrl == "https://cn.bing.com/translator" ? "cn" : "www",
+                            ig: (() => {
+                                let s = "";
+                                for (let i = 0; i < 32; i++) {
+                                    s += Math.floor(Math.random() * 36).toString(36).toUpperCase();
+                                }
+                                return s;
+                            })(),
+                            iid: (() => {
+                                let s = "translator.";
+                                for (let i = 0; i < 4; i++) {
+                                    s += Math.floor(Math.random() * 10).toString(10).toUpperCase();
+                                }
+                                return s;
+                            })()
+                        };
                         resolve(auth);
                     },
                     onerror: (e) => {
@@ -41,7 +60,7 @@
             });
         }
         static translation(auth, texts) {
-            let { key, token } = auth;
+            let { key, token, region, ig, iid } = auth;
             let promise = Promise.resolve({});
             let subTextLen = 0;
             let subTexts = [];
@@ -56,7 +75,7 @@
                         return new Promise((resolve, reject) => {
                             GM_xmlhttpRequest({
                                 method: "POST",
-                                url: "https://cn.bing.com/ttranslatev3?isVertical=1&&IG=2CB2C389B2FD46AE96301F20ACD168D1&IID=translator.5027",
+                                url: `https://${region}.bing.com/ttranslatev3?isVertical=1&IG=${ig}&IID=${iid}`,
                                 data: `token=${token}&key=${key}&text=${encodeURIComponent(tempTexts.join("🍕"))}&fromLang=auto-detect&to=zh-Hans&tryFetchingGenderDebiasedTranslations=true`,
                                 headers: {
                                     "content-type": "application/x-www-form-urlencoded"
@@ -68,7 +87,7 @@
                                     try {
                                         transText = JSON.parse(resp.responseText)[0].translations[0].text;
                                     } catch (e) {
-                                        console.log(e,resp)
+                                        console.log(e, resp)
                                         reject(e);
                                         return;
                                     }
@@ -249,7 +268,7 @@
     const getAuthPromise = () => {
         return new Promise((resolve, reject) => {
             let auth = auths[instance.getCode()];
-            if (auth && (!auth.timeout || new Date().getTime() - auth.time < auth.timeout * 0.8)) {
+            if (auth && (auth.timeout == null || auth.timeout == undefined || new Date().getTime() - auth.time < auth.timeout * 0.8)) {
                 resolve(auth);
                 return;
             }
@@ -336,8 +355,10 @@
         }
     });
 
+
     let menuKeys = [];
     const initMenu = () => {
+        GM_registerMenuCommand("清理token缓存", () => GM_setValue("AUTHS", ""));
         menuKeys.forEach(key => [
             GM_unregisterMenuCommand(key)
         ])
