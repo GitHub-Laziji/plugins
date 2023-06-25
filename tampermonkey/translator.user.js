@@ -134,7 +134,7 @@
         auths = JSON.parse(GM_getValue("AUTHS"));
     } catch (e) {
         auths = {};
-        GM_setValue("AUTHS", JSON.stringify(auths));
+        GM_setValue("AUTHS", "{}");
     }
 
 
@@ -248,7 +248,7 @@
     });
 
     document.addEventListener('keydown', (e) => {
-        if ((IS_MAC && e.ctrlKey || !IS_MAC && e.altKey) && e.shiftKey && e.code === "KeyW") {
+        if ((IS_MAC && e.ctrlKey || !IS_MAC && e.altKey) && e.shiftKey && e.code === "KeyQ") {
             getSelectedNodes().forEach(t => {
                 if (t.TRANSLATION_STATUS == "TRANSLATED") {
                     t.textContent = t.ORIGIN_TEXT;
