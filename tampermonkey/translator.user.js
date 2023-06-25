@@ -108,112 +108,13 @@
         }
     }
 
-    class DeepLTranslator {
-        static getCode() {
-            return "DeepL";
-        }
-        static getName() {
-            return "DeepL";
-        }
-        static getAuth() {
-            return Promise.resolve({})
-        }
-        static translation(auth, texts) {
-            let promise = Promise.resolve({});
-            let subTextLen = 0;
-            let subTexts = [];
-            for (let i = 0; i < texts.length; i++) {
-                subTexts.push(texts[i]);
-                subTextLen += texts[i].length;
-                if (i == texts.length - 1 || subTextLen + texts[i + 1].length > 4000) {
-                    let tempTexts = subTexts;
-                    subTexts = [];
-                    subTextLen = 0;
-                    promise = promise.then((result) => {
-                        return new Promise((resolve, reject) => {
-                            GM_xmlhttpRequest({
-                                method: "POST",
-                                url: "https://www2.deepl.com/jsonrpc?method=LMT_handle_jobs",
-                                data: JSON.stringify({
-                                    "jsonrpc": "2.0",
-                                    "method": "LMT_handle_jobs",
-                                    "params": {
-                                        "jobs": [
-                                            {
-                                                "kind": "default",
-                                                "sentences": [
-                                                    {
-                                                        "text": tempTexts.join("🍕"),
-                                                        "id": 0,
-                                                        "prefix": ""
-                                                    }
-                                                ],
-                                                "preferred_num_beams": 3,
-                                                "quality": "fast"
-                                            }
-                                        ],
-                                        "lang": {
-                                            "source_lang_user_selected": "auto",
-                                            "target_lang": "ZH"
-                                        },
-                                        "priority": -1,
-                                        "commonJobParams": {
-                                            "mode": "translate",
-                                            "browserType": 1
-                                        },
-                                        "timestamp": new Date().getTime()
-                                    }
-                                }),
-                                headers: {
-                                    "content-type": "application/json"
-                                },
-                                anonymous: true,
-                                nocache: true,
-                                onload: (e) => {
-                                    let transText;
-                                    try {
-                                        let beams = JSON.parse(e.responseText).result.translations[0].beams;
-                                        let minEnCount = null;
-                                        let maxStrLen = null;
-                                        beams.forEach(b => {
-                                            let enCount = 0;
-                                            for (let ch of b.sentences[0].text) {
-                                                if (ch >= 'a' && ch <= 'z' || ch >= 'A' && ch <= 'Z') {
-                                                    enCount++;
-                                                }
-
-                                            }
-                                            if (minEnCount == null || enCount < minEnCount || enCount == minEnCount && b.sentences[0].text.length > maxStrLen) {
-                                                transText = b.sentences[0].text;
-                                                minEnCount = enCount;
-                                                maxStrLen = b.sentences[0].text.length;
-                                            }
-                                        })
-                                    } catch (e) {
-                                        reject(e);
-                                        return;
-                                    }
-                                    let transArr = transText.split("🍕");
-                                    tempTexts.forEach((v, i) => result[v] = transArr[i]);
-                                    resolve(result);
-                                },
-                                onerror: (e) => {
-                                    reject(e);
-                                }
-                            });
-                        });
-                    });
-                }
-            }
-            return promise;
-        }
-    }
 
 
 
 
+    GM_registerMenuCommand("清理token缓存", () => GM_setValue("AUTHS", "{}"));
 
-
+    const IS_MAC = /macintosh|mac os x/i.test(navigator.userAgent.toLowerCase());
     const TRANSLATORS = [BingTranslator];
     const TRANSLATOR_MAPPING = {};
     TRANSLATORS.forEach(translator => {
@@ -229,12 +130,14 @@
     }
 
     let auths;
-    if (GM_getValue("AUTHS")) {
+    try {
         auths = JSON.parse(GM_getValue("AUTHS"));
-    } else {
+    } catch (e) {
         auths = {};
-        GM_setValue("AUTHS", auths);
+        GM_setValue("AUTHS", JSON.stringify(auths));
     }
+
+
 
     const getSelectedNodes = function () {
         if (window.getSelection().rangeCount == 0) {
@@ -284,7 +187,7 @@
     let promise = getAuthPromise();
 
     document.addEventListener('keydown', (e) => {
-        if (e.ctrlKey && e.code === "KeyQ") {
+        if ((IS_MAC && e.ctrlKey || !IS_MAC && e.altKey) && !e.shiftKey && e.code === "KeyQ") {
             let textMap = {};
             let texts = [];
             getSelectedNodes().forEach(t => {
@@ -345,7 +248,7 @@
     });
 
     document.addEventListener('keydown', (e) => {
-        if (e.ctrlKey && e.code === "KeyW") {
+        if ((IS_MAC && e.ctrlKey || !IS_MAC && e.altKey) && e.shiftKey && e.code === "KeyW") {
             getSelectedNodes().forEach(t => {
                 if (t.TRANSLATION_STATUS == "TRANSLATED") {
                     t.textContent = t.ORIGIN_TEXT;
@@ -358,7 +261,6 @@
 
     let menuKeys = [];
     const initMenu = () => {
-        GM_registerMenuCommand("清理token缓存", () => GM_setValue("AUTHS", ""));
         menuKeys.forEach(key => [
             GM_unregisterMenuCommand(key)
         ])
