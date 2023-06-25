@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         网页翻译
 // @namespace    laziji
-// @version      0.1
+// @version      0.2
 // @description  网页翻译
 // @author       laziji
 // @include      *://*/*
