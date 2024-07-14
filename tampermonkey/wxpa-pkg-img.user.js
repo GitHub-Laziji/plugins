@@ -4,7 +4,7 @@
 // @version      0.1
 // @description  wxpa图片打包
 // @author       laziji
-// @match        https://mp.weixin.qq.com/cgi-bin/*
+// @match        https://mp.weixin.qq.com/cgi-bin/message?*
 // @require      https://cdn.bootcdn.net/ajax/libs/jszip/3.6.0/jszip.min.js
 // @grant        none
 // ==/UserScript==
