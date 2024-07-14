@@ -33,5 +33,10 @@
         "name": "网页翻译",
         "desc": "网页翻译",
         "path": "https://github.com/GitHub-Laziji/plugins/raw/main/tampermonkey/translator.user.js"
+    },
+    {
+        "name": "wxpa图片打包",
+        "desc": "wxpa图片打包",
+        "path": "https://github.com/GitHub-Laziji/plugins/raw/main/tampermonkey/wxpa-pkg-img.user.js"
     }
 ]
